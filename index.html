@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Walker Community - Admin & Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- LOGO / TOPP -->
+    <header>
+        <h1>WALKER // COMMUNITY</h1>
+        <p>Offisiell fanside - Streng moderering aktivert</p>
+    </header>
+
+    <div class="container">
+        
+        <!-- CHAT-BOKSEN -->
+        <main class="chat-section">
+            <h2># Hovedchat</h2>
+            <div class="chat-box" id="chatBox">
+                <div class="message system">
+                    <span class="user">SYSTEM:</span> Velkommen til fellesskapet. Hold en god tone!
+                </div>
+                <div class="message">
+                    <span class="user Walker99">Walker99:</span> Gleder meg til neste konsert!
+                </div>
+            </div>
+            
+            <!-- Sende melding-felt -->
+            <div class="chat-input-area">
+                <input type="text" id="messageInput" placeholder="Skriv en melding her...">
+                <button onclick="sendMelding()">Send</button>
+            </div>
+        </main>
+
+        <!-- STYRER-PANEL (ADMIN) -->
+        <aside class="admin-panel">
+            <h2>[ STYRER-PANEL ]</h2>
+            <p>Du er logget inn som: <strong>Sjefen (Admin)</strong></p>
+            
+            <h3>Aktive brukere:</h3>
+            <ul class="user-list">
+                <li>
+                    <span>Walker99 (0 advarsler)</span>
+                    <button class="btn-ban" onclick="banBruker('Walker99')">BAN</button>
+                </li>
+                <li>
+                    <span>TrolleGutt (2 advarsler)</span>
+                    <button class="btn-ban" onclick="banBruker('TrolleGutt')">BAN</button>
+                </li>
+            </ul>
+        </aside>
+
+    </div>
+
+</body>
+</html>
