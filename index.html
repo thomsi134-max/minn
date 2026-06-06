@@ -3,119 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Walker Community - Admin & Chat</title>
+    <title>Walker Discord Community</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- LOGO / TOPP -->
-    <header>
-        <h1>WALKER // COMMUNITY</h1>
-        <p>Offisiell fanside - Streng moderering aktivert</p>
-    </header>
-
-    <div class="container">
+    <!-- DISCORD LAYOUT -->
+    <div class="discord-container">
         
-        <!-- CHAT-BOKSEN -->
-        <main class="chat-section">
-            <h2># Hovedchat</h2>
+        <!-- VENSTRE: KANALLISTE (SIDEBAR) -->
+        <div class="sidebar">
+            <div class="server-header">
+                <h3>WALKER // SERVER</h3>
+            </div>
+            <div class="channels">
+                <p class="category">TEKSTKANALER</p>
+                <div class="channel active"># 💬-hovedchat</div>
+                <div class="channel"># 🎵-alan-walker-musikk</div>
+                <div class="channel"># 📢-annonseringer</div>
+            </div>
+            <!-- Viser hvem du er logget inn som nederst -->
+            <div class="user-profile">
+                <div class="avatar"></div>
+                <div class="user-info">
+                    <span id="myUsernameDisplay">Laster...</span>
+                    <span class="status">Styrer (Admin)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MIDTEN: CHATTEN -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <h2># hovedchat</h2>
+                <p>Velkommen til starten av #hovedchat-kanalen.</p>
+            </div>
+            
             <div class="chat-box" id="chatBox">
                 <div class="message system">
-                    <span class="user">SYSTEM:</span> Velkommen til fellesskapet. Hold en god tone!
-                </div>
-                <div class="message">
-                    <span class="user Walker99">Walker99:</span> Gleder meg til neste konsert!
+                    <span class="user">SYSTEM:</span> AI-moderering er aktivert. Stygge ord slettes umiddelbart.
                 </div>
             </div>
             
-            <!-- Sende melding-felt -->
-            <div class="chat-input-area">
-                <input type="text" id="messageInput" placeholder="Skriv en melding her...">
-                <button onclick="sendMelding()">Send</button>
+            <div class="chat-input-wrapper">
+                <input type="text" id="messageInput" placeholder="Send en melding til #hovedchat...">
             </div>
-        </main>
+        </div>
 
-        <!-- STYRER-PANEL (ADMIN) -->
-        <aside class="admin-panel">
-            <h2>[ STYRER-PANEL ]</h2>
-            <p>Du er logget inn som: <strong>Sjefen (Admin)</strong></p>
+        <!-- HØYRE: MEDLEMSLISTE & STYRERPANEL -->
+        <div class="members-list">
+            <h3>MEDLEMMER VIA SERVEREN</h3>
             
-            <h3>Aktive brukere:</h3>
-            <ul class="user-list">
-                <li>
-                    <span>Walker99 (0 advarsler)</span>
-                    <button class="btn-ban" onclick="banBruker('Walker99')">BAN</button>
-                </li>
-                <li>
-                    <span>TrolleGutt (2 advarsler)</span>
-                    <button class="btn-ban" onclick="banBruker('TrolleGutt')">BAN</button>
-                </li>
-            </ul>
-        </aside>
+            <div class="member-group">STYRER (1)</div>
+            <div class="member-card admin">
+                <div class="avatar"></div>
+                <span id="adminListName">Deg</span>
+            </div>
+
+            <div class="member-group">ONLINE (2)</div>
+            
+            <!-- Walker99 -->
+            <div class="member-card" id="member-Walker99">
+                <div class="avatar"></div>
+                <div class="member-info">
+                    <span>Walker99</span>
+                    <small id="warn-Walker99">0 advarsler</small>
+                </div>
+                <button class="btn-ban" onclick="banBruker('Walker99')">BAN</button>
+            </div>
+
+            <!-- TrolleGutt -->
+            <div class="member-card" id="member-TrolleGutt">
+                <div class="avatar trolle"></div>
+                <div class="member-info">
+                    <span>TrolleGutt</span>
+                    <small id="warn-TrolleGutt">0 advarsler</small>
+                </div>
+                <button class="btn-ban" onclick="banBruker('TrolleGutt')">BAN</button>
+            </div>
+        </div>
 
     </div>
-<!-- SCRIPT SOM STYRER LOGIKKEN, WARNINGS OG BANNING -->
+
+    <!-- JAVASCRIPT FOR LOGIKK, NAVN OG TROLLEGUTT -->
     <script>
-        // Liste med ord som ikke er lov (Svarteliste)
-        const styggeOrd = ["stygg", "teit", "dust", "noob", "bæsj"]; 
+        const styggeOrd = ["stygg", "teit", "dust", "noob", "bæsj", "mobb"]; 
+        let mittNavn = "";
         
-        // Oversikt over brukere og deres advarsler (Simulert database)
         let advarsler = {
             "Walker99": 0,
-            "TrolleGutt": 2
+            "TrolleGutt": 0
         };
 
-        // Funksjon for å sende melding
-        function sendMelding() {
-            const inputFelt = document.getElementById("messageInput");
-            let tekst = inputFelt.value.trim();
+        let bannedeBrukere = [];
+
+        // 1. VELG BRUKERNAVN NÅR SIDEN ÅPNES
+        window.onload = function() {
+            let navn = prompt("Hva vil du hete på serveren?");
+            if (navn === null || navn.trim() === "") {
+                mittNavn = "UkjentStyrer";
+            } else {
+                mittNavn = navn.trim();
+            }
+            document.getElementById("myUsernameDisplay").innerText = mittNavn;
+            document.getElementById("adminListName").innerText = mittNavn + " (Deg)";
             
-            if (tekst === "") return; // Ikke send tomme meldinger
+            // Start TrolleGutt sin automatiske trolling
+            startTrolleGutt();
+        };
 
-            let brukernavn = "Walker99"; // Vi later som vi er denne brukeren når vi tester
+        // Lytt til "Enter"-tasten i chatten
+        document.getElementById("messageInput").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                sendMelding(mittNavn, this.value, true);
+                this.value = "";
+            }
+        });
+
+        // 2. FUNKSJON FOR Å SENDE / SJEKKE MELDINGER
+        function sendMelding(sender, tekst, erMeg) {
+            tekst = tekst.trim();
+            if (tekst === "") return;
+
+            // Sjekk om senderen er bannet
+            if (bannedeBrukere.includes(sender)) return;
+
             let inneholderStygtOrd = false;
-
-            // Sjekk om meldingen inneholder stygge ord
             styggeOrd.forEach(ord => {
                 if (tekst.toLowerCase().includes(ord)) {
                     inneholderStygtOrd = true;
                 }
             });
 
+            // Hvis meldingen er stygg -> SLETT OG GI ADVARSEL
             if (inneholderStygtOrd) {
-                // Slett meldingen (tøm feltet) og gi advarsel
-                inputFelt.value = "";
-                advarsler[brukernavn]++;
-                
-                alert(`⚠️ MELDING BLOKKERT! Du skrev et ulovlig ord. Du har nå ${advarsler[brukernavn]} advarsel(er).`);
-                
-                // Hvis brukeren bikker 3 advarsler, blir de bannet automatisk
-                if (advarsler[brukernavn] >= 3) {
-                    alert("🚫 Du har fått 3 advarsler og er herved BANNET fra Walker Community!");
-                    document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:20%; font-family:monospace;'>DU ER BANNET FOR MOBBING.</h1>";
+                if (erMeg) {
+                    alert("⚠️ Som styrer bør du foregå med et godt eksempel! Meldingen ble stoppet.");
+                } else {
+                    // Gi boten/brukeren advarsel
+                    advarsler[sender]++;
+                    document.getElementById(`warn-${sender}`).innerText = `${advarsler[sender]} advarsler`;
+                    
+                    // Vis i chatten at systemet slettet meldingen
+                    visMeldingIBox("SYSTEM", `⚠️ Slettet en stygg melding fra ${sender}. Advarsel utdelt (${advarsler[sender]}/3).`, "system");
+
+                    if (advarsler[sender] >= 3) {
+                        autoBan(sender);
+                    }
                 }
                 return;
             }
 
-            // Hvis meldingen er OK, legg den til i chat-boksen
+            // Hvis alt er i orden, vis meldingen
+            visMeldingIBox(sender, tekst, erMeg ? "meg" : "");
+        }
+
+        function visMeldingIBox(sender, tekst, type) {
             const chatBox = document.getElementById("chatBox");
             const nyMelding = document.createElement("div");
             nyMelding.classList.add("message");
-            nyMelding.innerHTML = `<span class="user">${brukernavn}:</span> ${tekst}`;
-            
+            if (type === "system") nyMelding.classList.add("system");
+            if (type === "meg") nyMelding.classList.add("meg");
+
+            nyMelding.innerHTML = `<span class="user">${sender}:</span> <span class="text">${tekst}</span>`;
             chatBox.appendChild(nyMelding);
-            chatBox.scrollTop = chatBox.scrollHeight; // Scroller automatisk ned
-            inputFelt.value = ""; // Tømmer tekstfeltet
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // Funksjon for at DU kan banne folk fra styrer-panelet
+        // 3. TROLLEGUTT-BOT (Simulerer en slem bruker)
+        function startTrolleGutt() {
+            const trolleMeldinger = [
+                "Hei alle sammen!",
+                "Alan Walker er teit, klanen hans er noob!", // Stygg
+                "Gleder meg til helg.",
+                "Dere er noen duster som gidder å være her.", // Stygg
+                "Dette samfunnet er dritstygg mobb.", // Stygg
+                "Hører på Faded akkurat nå!"
+            ];
+
+            let i = 0;
+            setInterval(() => {
+                if (!bannedeBrukere.includes("TrolleGutt")) {
+                    let tilfeldigMelding = trolleMeldinger[Math.floor(Math.random() * trolleMeldinger.length)];
+                    sendMelding("TrolleGutt", tilfeldigMelding, false);
+                }
+            }, 8000); // Skriver noe hvert 8. sekund
+        }
+
+        // 4. AUTOMATISK BAN VED 3 ADVARSLER
+        function autoBan(navn) {
+            bannedeBrukere.push(navn);
+            visMeldingIBox("SYSTEM", `🚫 ${navn} har blitt AUTOMATISK BANNET etter 3 advarsler!`, "system");
+            fjernFraListe(navn);
+        }
+
+        // 5. MANUELL BAN-KNAPP (For deg som Styrer)
         function banBruker(navn) {
-            let bekreft = confirm(`Er du sikker på at du vil banne ${navn}?`);
+            let bekreft = confirm(`Vil du bruke Styrer-makten din til å BANNE ${navn} umiddelbart?`);
             if (bekreft) {
-                alert(`🔨 Brukeren ${navn} har blitt bannet av Styreren!`);
-                
-                // Simulerer at brukeren blir borte fra listen
-                // I en ekte database vil denne personen aldri slippe inn igjen.
+                bannedeBrukere.push(navn);
+                visMeldingIBox("SYSTEM", `🔨 ${navn} ble MANUELT BANNET av styreren ${mittNavn}!`, "system");
+                fjernFraListe(navn);
+            }
+        }
+
+        function fjernFraListe(navn) {
+            const card = document.getElementById(`member-${navn}`);
+            if (card) {
+                card.style.opacity = "0.3";
+                card.querySelector("button").disabled = true;
+                card.querySelector("button").innerText = "BANNED";
             }
         }
     </script>
