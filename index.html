@@ -54,6 +54,70 @@
         </aside>
 
     </div>
+<!-- SCRIPT SOM STYRER LOGIKKEN, WARNINGS OG BANNING -->
+    <script>
+        // Liste med ord som ikke er lov (Svarteliste)
+        const styggeOrd = ["stygg", "teit", "dust", "noob", "bæsj"]; 
+        
+        // Oversikt over brukere og deres advarsler (Simulert database)
+        let advarsler = {
+            "Walker99": 0,
+            "TrolleGutt": 2
+        };
 
+        // Funksjon for å sende melding
+        function sendMelding() {
+            const inputFelt = document.getElementById("messageInput");
+            let tekst = inputFelt.value.trim();
+            
+            if (tekst === "") return; // Ikke send tomme meldinger
+
+            let brukernavn = "Walker99"; // Vi later som vi er denne brukeren når vi tester
+            let inneholderStygtOrd = false;
+
+            // Sjekk om meldingen inneholder stygge ord
+            styggeOrd.forEach(ord => {
+                if (tekst.toLowerCase().includes(ord)) {
+                    inneholderStygtOrd = true;
+                }
+            });
+
+            if (inneholderStygtOrd) {
+                // Slett meldingen (tøm feltet) og gi advarsel
+                inputFelt.value = "";
+                advarsler[brukernavn]++;
+                
+                alert(`⚠️ MELDING BLOKKERT! Du skrev et ulovlig ord. Du har nå ${advarsler[brukernavn]} advarsel(er).`);
+                
+                // Hvis brukeren bikker 3 advarsler, blir de bannet automatisk
+                if (advarsler[brukernavn] >= 3) {
+                    alert("🚫 Du har fått 3 advarsler og er herved BANNET fra Walker Community!");
+                    document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:20%; font-family:monospace;'>DU ER BANNET FOR MOBBING.</h1>";
+                }
+                return;
+            }
+
+            // Hvis meldingen er OK, legg den til i chat-boksen
+            const chatBox = document.getElementById("chatBox");
+            const nyMelding = document.createElement("div");
+            nyMelding.classList.add("message");
+            nyMelding.innerHTML = `<span class="user">${brukernavn}:</span> ${tekst}`;
+            
+            chatBox.appendChild(nyMelding);
+            chatBox.scrollTop = chatBox.scrollHeight; // Scroller automatisk ned
+            inputFelt.value = ""; // Tømmer tekstfeltet
+        }
+
+        // Funksjon for at DU kan banne folk fra styrer-panelet
+        function banBruker(navn) {
+            let bekreft = confirm(`Er du sikker på at du vil banne ${navn}?`);
+            if (bekreft) {
+                alert(`🔨 Brukeren ${navn} har blitt bannet av Styreren!`);
+                
+                // Simulerer at brukeren blir borte fra listen
+                // I en ekte database vil denne personen aldri slippe inn igjen.
+            }
+        }
+    </script>
 </body>
 </html>
